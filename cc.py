@@ -145,14 +145,14 @@ def readcsv( filename ):
 	
 	return a
 
-def createcolumnlist(a):
+def createcolumnlist(a): # use it to get definition of columns on top
 	j = 0
 	
 	for a[0] in a[0]:
 		print a[0], '=', j
 		j += 1
 
-def listSlices(a, column):
+def listSlices(a, column): # lists slices in experiment
 	slice = 'FileName'	# need to skip first row
 	slicelist = []
 	
@@ -163,7 +163,7 @@ def listSlices(a, column):
 			slicelist.append(slice1)
 	return slicelist
 
-def getValues(a, slice, column):
+def getValues(a, slice, column):	# gets the values for a given slice and row
 	thevalues = []
 
 	for a in a:
@@ -198,14 +198,21 @@ def mean(array):
 
 # --------------------------------------------------------- .split('_')[0]
 
-sliceinfo = FileName_DAPI
+sliceinfo = FileName_DAPI	# which column should be taken to parse the slice name?
 
-a = readcsv(filename)	# read file
-slicelist = listSlices(a, sliceinfo)
+a = readcsv(filename)	# read file into array
+slicelist = listSlices(a, sliceinfo)	# generate list of slices in file
 
+
+print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t', 'PercentGreen\t', 'PercentRed\t'
 for slicelist in slicelist:
+
 	nuclei = getValues(a, slicelist, Count_Nuclei)
+	no = len(getValues(a, slicelist, Count_Nuclei))
 	green = getValues(a, slicelist, Count_FilteredGreen)
 	greenred = getValues(a, slicelist, Count_FilteredGreenRedDouble)
 	red = getValues(a, slicelist, Count_FilteredRed)
-	print slicelist,'\t',add(nuclei),'\t',add(green),'\t',add(greenred),'\t',add(red)
+	thresh_green = getValues(a, slicelist, Math_Math_Green)
+	thresh_red = getValues(a, slicelist, Math_Math_Red)
+	
+	print slicelist,'\t',no,'\t',add(nuclei),'\t',add(green),'\t',add(greenred),'\t',add(red),'\t',mean(thresh_green),'\t',mean(thresh_red),'\t',(add(green)-add(greenred))/add(nuclei)*100,'\t',(add(red)-add(greenred))/add(nuclei)*100
