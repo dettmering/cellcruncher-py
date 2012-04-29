@@ -21,16 +21,14 @@ def createcolumnlist(a): # use it to get definition of columns on top
 	j = 0
 	l = {}
 	
-	for a[0] in a[0]:
-		l[a[0]] = j
+	for x in a[0]:
+		l[x] = j
 		j += 1
 	return l
 
 def listSlices(a, column): # lists slices in experiment
 	slice = 'FileName'	# need to skip first row
 	slicelist = []
-	
-	print a[38]
 	
 	for a in a:
 		slice1 = a[column].split('_')[0]
@@ -53,8 +51,8 @@ def add(array):
 	n = 0
 	y = 0
 	
-	for array in array:
-		y = float(array)
+	for x in array:
+		y = float(x)
 		n += y
 	return n
 	
@@ -63,8 +61,8 @@ def mean(array):
 	y = 0
 	i = 0
 	
-	for array in array:
-		y = float(array)
+	for x in array:
+		y = float(x)
 		n += y
 		i += 1
 	result = n / i
