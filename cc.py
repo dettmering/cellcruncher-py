@@ -78,6 +78,14 @@ def stdev(array):
 	
 	return sigma
 
+def sterr(array):
+	n = int(len(array))
+	sigma = stdev(array)
+	
+	ste = sigma / math.sqrt(n)
+	
+	return ste
+
 # --------------------------------------------------------- .split('_')[0]
 
 a = readcsv(filename)	# read file into array
@@ -88,7 +96,7 @@ sliceinfo = col['FileName_DAPI']	# which column should be taken to parse the sli
 slicelist = listSlices(a, sliceinfo)	# generate list of slices in file
 
 
-print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t', 'PercentGreen\t', 'PercentRed\t'
+print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 for slicelist in slicelist:
 
 	nuclei = getValues(a, slicelist, col['Count_Nuclei'])
@@ -99,4 +107,4 @@ for slicelist in slicelist:
 	thresh_green = getValues(a, slicelist, col['Math_Math_Green'])
 	thresh_red = getValues(a, slicelist, col['Math_Math_Red'])
 	
-	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',mean(thresh_green) * 65536,'\t',mean(thresh_red) * 65536,'\t',(sum(green)-sum(greenred))/sum(nuclei)*100,'\t',(sum(red)-sum(greenred))/sum(nuclei)*100
+	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',(sum(green)-sum(greenred))/sum(nuclei)*100,'\t',(sum(red)-sum(greenred))/sum(nuclei)*100,'\t',round(mean(nuclei)),'\t',round(stdev(nuclei)),'\t',mean(thresh_green) * 65536,'\t',mean(thresh_red) * 65536
