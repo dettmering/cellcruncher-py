@@ -1,5 +1,6 @@
 import csv
 import sys
+import math
 
 filename = sys.argv[1]
 
@@ -17,7 +18,7 @@ def readcsv( filename ):
 	
 	return a
 
-def createcolumnlist(a): # use it to get definition of columns on top
+def createcolumnlist(a): # gets the name of the columns and creates dictionary with respective column numbers
 	j = 0
 	l = {}
 	
@@ -47,28 +48,35 @@ def getValues(a, slice, column):	# gets the values for a given slice and row
 
 # MATH FUNCTIONS
 
-def add(array):
+def sum(array):
 	n = 0
-	y = 0
-	
-	for x in array:
-		y = float(x)
-		n += y
+	y = [float(i) for i in array]
+
+	n = math.fsum(y)	
+
 	return n
 	
 def mean(array):
-	n = 0
-	y = 0
-	i = 0
+	i = len(array)
+	y = sum(array)
+	
+	result = y / i
+	
+	return result
+	
+def stdev(array):
+	n = int(len(array))
+	m = float(mean(array))
+	s = 0
 	
 	for x in array:
 		y = float(x)
-		n += y
-		i += 1
-	result = n / i
+		sqdev = (y - m) * (y - m)
+		s += sqdev
 	
-	return result
-		
+	sigma = math.sqrt(s / (n - 1))
+	
+	return sigma
 
 # --------------------------------------------------------- .split('_')[0]
 
@@ -91,4 +99,4 @@ for slicelist in slicelist:
 	thresh_green = getValues(a, slicelist, col['Math_Math_Green'])
 	thresh_red = getValues(a, slicelist, col['Math_Math_Red'])
 	
-	print slicelist,'\t',no,'\t',add(nuclei),'\t',add(green),'\t',add(greenred),'\t',add(red),'\t',mean(thresh_green),'\t',mean(thresh_red),'\t',(add(green)-add(greenred))/add(nuclei)*100,'\t',(add(red)-add(greenred))/add(nuclei)*100
+	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',mean(thresh_green) * 65536,'\t',mean(thresh_red) * 65536,'\t',(sum(green)-sum(greenred))/sum(nuclei)*100,'\t',(sum(red)-sum(greenred))/sum(nuclei)*100
