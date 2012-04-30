@@ -1,6 +1,7 @@
 import csv
 import sys
 import math
+import time
 
 filename = sys.argv[1]
 
@@ -42,9 +43,33 @@ def getValues(a, slice, column):	# gets the values for a given slice and row
 	thevalues = []
 
 	for a in a:
-		if a[sliceinfo].split('_')[0] == slice:
+		if slice != 0:	# if slice = 0 then all values will be returned, irrespective of slice no
+			if a[sliceinfo].split('_')[0] == slice:
+				thevalues.append(a[column])
+		else:
 			thevalues.append(a[column])
+
+	if slice == 0:	# removes column designation in case all values of a column are returned
+		thevalues.pop(0)
+
 	return thevalues
+
+def getMetadata(a):
+	thetime = time.asctime( time.localtime(time.time()) )	# local time
+	thefolder = a[1][col['PathName_DAPI']]	# folder of images
+	n = len(a)
+	
+	nuclei = int(sum(getValues(a, 0, col['Count_Nuclei'])))
+	timemanual = nuclei / 4	# estimation of counting time in seconds at a rate of 4 nuclei per s
+	
+	exectime = 0
+	
+	for i in col:	# calculates execution time of whole run in seconds
+		if i.find('ExecutionTime') == 0:
+			exectime += sum(getValues(a, 0, col[i]))
+	
+	x = [thetime, thefolder, n, nuclei, timemanual, exectime]
+	return x
 
 # MATH FUNCTIONS
 
@@ -95,6 +120,15 @@ sliceinfo = col['FileName_DAPI']	# which column should be taken to parse the sli
 
 slicelist = listSlices(a, sliceinfo)	# generate list of slices in file
 
+meta = getMetadata(a)
+print meta[0]
+print meta[1]
+print meta[2], 'Images'
+print meta[3], 'Nuclei'
+print round((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
+print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
+print ''
+
 
 print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 for slicelist in slicelist:
@@ -107,4 +141,4 @@ for slicelist in slicelist:
 	thresh_green = getValues(a, slicelist, col['Math_Math_Green'])
 	thresh_red = getValues(a, slicelist, col['Math_Math_Red'])
 	
-	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',(sum(green)-sum(greenred))/sum(nuclei)*100,'\t',(sum(red)-sum(greenred))/sum(nuclei)*100,'\t',round(mean(nuclei)),'\t',round(stdev(nuclei)),'\t',mean(thresh_green) * 65536,'\t',mean(thresh_red) * 65536
+	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
