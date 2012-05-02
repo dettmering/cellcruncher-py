@@ -57,10 +57,10 @@ def getValues(a, slice, column):	# gets the values for a given slice and row
 def getMetadata(a):
 	thetime = time.asctime( time.localtime(time.time()) )	# local time
 	thefolder = a[1][col['PathName_DAPI']]	# folder of images
-	n = len(a)
+	n = len(a) - 1	# -1 to account for column name
 	
 	nuclei = int(sum(getValues(a, 0, col['Count_Nuclei'])))
-	timemanual = nuclei / 4	# estimation of counting time in seconds at a rate of 4 nuclei per s
+	timemanual = nuclei / 3	# estimation of counting time in seconds at a rate of 3 nuclei per s
 	
 	exectime = 0
 	
@@ -125,7 +125,7 @@ print meta[0]
 print meta[1]
 print meta[2], 'Images'
 print meta[3], 'Nuclei'
-print round((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
+print 'at least', int((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
 print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
 print ''
 
