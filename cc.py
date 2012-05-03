@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import csv
 import sys
 import math
@@ -99,8 +101,11 @@ def stdev(array):
 		sqdev = (y - m) * (y - m)
 		s += sqdev
 	
-	sigma = math.sqrt(s / (n - 1))
-	
+	if n > 1 :
+		sigma = math.sqrt(s / (n - 1))
+	else:
+		sigma = 0
+
 	return sigma
 
 def sterr(array):
