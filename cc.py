@@ -65,12 +65,17 @@ def getMetadata(a):
 	timemanual = nuclei / 3	# estimation of counting time in seconds at a rate of 3 nuclei per s
 	
 	exectime = 0
+	errors = 0
 	
 	for i in col:	# calculates execution time of whole run in seconds
 		if i.find('ExecutionTime') == 0:
 			exectime += sum(getValues(a, 0, col[i]))
+
+	for j in col:	# adds up errors
+		if j.find('ModuleError') == 0:
+			errors += sum(getValues(a, 0, col[j]))
 	
-	x = [thetime, thefolder, n, nuclei, timemanual, exectime]
+	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors)]
 	return x
 
 # MATH FUNCTIONS
@@ -101,7 +106,7 @@ def stdev(array):
 		sqdev = (y - m) * (y - m)
 		s += sqdev
 	
-	if n > 1 :
+	if n > 1 :	# if n = 1 a division by zero error will occur
 		sigma = math.sqrt(s / (n - 1))
 	else:
 		sigma = 0
@@ -132,10 +137,11 @@ print meta[2], 'Images'
 print meta[3], 'Nuclei'
 print 'at least', int((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
 print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
+print meta[6], 'Errors'
 print ''
 
 
-print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
+print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 for slicelist in slicelist:
 
 	nuclei = getValues(a, slicelist, col['Count_Nuclei'])
@@ -143,7 +149,7 @@ for slicelist in slicelist:
 	green = getValues(a, slicelist, col['Count_FilteredGreen'])
 	greenred = getValues(a, slicelist, col['Count_FilteredGreenRedDouble'])
 	red = getValues(a, slicelist, col['Count_FilteredRed'])
-	thresh_green = getValues(a, slicelist, col['Math_Math_Green'])
-	thresh_red = getValues(a, slicelist, col['Math_Math_Red'])
-	
-	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
+	thresh_green = getValues(a, slicelist, col['Threshold_FinalThreshold_ThreshGreen'])	#getValues(a, slicelist, col['Math_Math_Green'])
+	thresh_red =  getValues(a, slicelist, col['Threshold_FinalThreshold_ThreshRed']) #getValues(a, slicelist, col['Math_Math_Red'])
+
+	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
