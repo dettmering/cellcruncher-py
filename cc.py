@@ -113,13 +113,13 @@ def stdev(array):
 
 	return sigma
 
-def sterr(array):
+def sem(array):
 	n = int(len(array))
 	sigma = stdev(array)
 	
-	ste = sigma / math.sqrt(n)
+	sterr = sigma / math.sqrt(n)
 	
-	return ste
+	return sterr
 
 # --------------------------------------------------------- .split('_')[0]
 
