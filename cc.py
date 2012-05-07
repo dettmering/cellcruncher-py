@@ -21,6 +21,13 @@ def readcsv( filename ):
 	
 	return a
 
+def checkData(data, keywords):
+	s = "\n".join(data)
+	for k in keywords:
+		if k in s:
+			return True
+	return False
+
 def createcolumnlist(a): # gets the name of the columns and creates dictionary with respective column numbers
 	j = 0
 	l = {}
@@ -40,6 +47,25 @@ def listSlices(a, column): # lists slices in experiment
 			slice = slice1
 			slicelist.append(slice1)
 	return slicelist
+
+def filterValues(a):
+	filterlist = readcsv(sys.argv[2]) 
+
+	filtered = []
+	rest = a
+	truecount = 0
+	falsecount = len(a) - 1
+
+	for j in filterlist:
+		for i in a:
+			if checkData(i, j) == True:
+				filtered.append(i)
+				rest.remove(i)
+				truecount += 1
+				falsecount -= 1	
+
+	output = [filtered, rest]
+	return output
 
 def getValues(a, slice, column):	# gets the values for a given slice and row
 	thevalues = []
@@ -77,6 +103,21 @@ def getMetadata(a):
 	
 	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors)]
 	return x
+
+def printResults(o, slicelist):
+	print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
+
+	for slicelist in slicelist:
+		if len(getValues(o, slicelist, col['Count_Nuclei'])) > 0:	#only lists slice when nuclei > 0, for filtering!
+			nuclei = getValues(o, slicelist, col['Count_Nuclei'])
+			no = len(getValues(o, slicelist, col['Count_Nuclei']))
+			green = getValues(o, slicelist, col['Count_FilteredGreen'])
+			greenred = getValues(o, slicelist, col['Count_FilteredGreenRedDouble'])
+			red = getValues(o, slicelist, col['Count_FilteredRed'])
+			thresh_green = getValues(o, slicelist, col['Threshold_FinalThreshold_ThreshGreen'])	#getValues(a, slicelist, col['Math_Math_Green'])
+			thresh_red =  getValues(o, slicelist, col['Threshold_FinalThreshold_ThreshRed']) #getValues(a, slicelist, col['Math_Math_Red'])
+
+			print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
 
 # MATH FUNCTIONS
 
@@ -140,16 +181,11 @@ print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
 print meta[6], 'Errors'
 print ''
 
-
-print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
-for slicelist in slicelist:
-
-	nuclei = getValues(a, slicelist, col['Count_Nuclei'])
-	no = len(getValues(a, slicelist, col['Count_Nuclei']))
-	green = getValues(a, slicelist, col['Count_FilteredGreen'])
-	greenred = getValues(a, slicelist, col['Count_FilteredGreenRedDouble'])
-	red = getValues(a, slicelist, col['Count_FilteredRed'])
-	thresh_green = getValues(a, slicelist, col['Threshold_FinalThreshold_ThreshGreen'])	#getValues(a, slicelist, col['Math_Math_Green'])
-	thresh_red =  getValues(a, slicelist, col['Threshold_FinalThreshold_ThreshRed']) #getValues(a, slicelist, col['Math_Math_Red'])
-
-	print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
+if len(sys.argv) == 3:	# if filtered list is given in command line...
+	print 'FILTERED'
+	printResults(filterValues(a)[0],slicelist)
+	print ''
+	print 'REST'
+	printResults(filterValues(a)[1],slicelist)
+else:
+	printResults(a,slicelist)
