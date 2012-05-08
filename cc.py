@@ -1,5 +1,5 @@
 #! /usr/bin/python
-# CellProfiler analysis script
+# CellProfiler analysis script by Till Dettmering, prinzipiell@gmail.com
 
 import csv
 import sys
