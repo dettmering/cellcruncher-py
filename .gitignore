@@ -1,0 +1,5 @@
+*.csv
+test.py
+.DS_Store
+*.awk
+*.txt
