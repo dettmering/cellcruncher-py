@@ -21,7 +21,7 @@ def readcsv( filename ):
 	
 	return a
 
-def checkData(data, keywords):
+def checkData(data, keywords):	# compares values in array with whole row
 	s = "\n".join(data)
 	for k in keywords:
 		if k in s:
@@ -48,7 +48,7 @@ def listSlices(a, column): # lists slices in experiment
 			slicelist.append(slice1)
 	return slicelist
 
-def filterValues(a):
+def filterValues(a):	# filters images from analysis which are found in exclusion file
 	filterlist = readcsv(sys.argv[2]) 
 
 	filtered = []
