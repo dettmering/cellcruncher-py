@@ -1,4 +1,5 @@
 #! /usr/bin/python
+# CellProfiler analysis script
 
 import csv
 import sys
