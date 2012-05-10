@@ -53,7 +53,7 @@ def filterValues(a):	# filters images from analysis which are found in exclusion
 	filterlist = readcsv(sys.argv[2]) 
 
 	filtered = []
-	rest = a
+	rest = a[:]
 	truecount = 0
 	falsecount = len(a) - 1
 
