@@ -8,7 +8,7 @@ import time
 
 filename = sys.argv[1]
 
-def readcsv( filename ):
+def readcsv(filename):	# Reads csv file into an array which will then be used for all searches and calculations. Might be a problem with very large DefaultOut_Image.csv files, tested it with 100 MB
 	ifile  = open(filename, "rb")
 	reader = csv.reader(ifile)
 	
@@ -22,14 +22,14 @@ def readcsv( filename ):
 	
 	return a
 
-def checkData(data, keywords):	# compares values in array with whole row
+def checkData(data, keywords):	# Searches string in Array by making one word out of the whole array. Very fast. Returns True if string is found.
 	s = "\n".join(data)
 	for k in keywords:
 		if k in s:
 			return True
 	return False
 
-def createcolumnlist(a): # gets the name of the columns and creates dictionary with respective column numbers
+def createcolumnlist(a): # Creates dictionary with column names and respective column numbers. Facilitates using the script. col['<ColumnName'] returns number.
 	j = 0
 	l = {}
 	
@@ -38,7 +38,7 @@ def createcolumnlist(a): # gets the name of the columns and creates dictionary w
 		j += 1
 	return l
 
-def listSlices(a, column): # lists slices in experiment
+def listSlices(a, column): # Creates list with all slides used in the experiment. Used later for whole-slide-operations. Assumes the file name to start with the slide name, followed by an underline: <slidename>_something.tif
 	slice = 'FileName'	# need to skip first row
 	slicelist = []
 	
@@ -49,11 +49,11 @@ def listSlices(a, column): # lists slices in experiment
 			slicelist.append(slice1)
 	return slicelist
 
-def filterValues(a):	# filters images from analysis which are found in exclusion file
+def filterValues(a):	# If you specify a file with a list of images behind the CSV file, CellCruncher will analyse these images separately. 
 	filterlist = readcsv(sys.argv[2]) 
 
 	filtered = []
-	rest = a[:]
+	rest = a[:]	# copies a, which will then be cleaned from the filtered images
 	truecount = 0
 	falsecount = len(a) - 1
 
@@ -68,7 +68,7 @@ def filterValues(a):	# filters images from analysis which are found in exclusion
 	output = [filtered, rest]
 	return output
 
-def getValues(a, slice, column):	# gets the values for a given slice and row
+def getValues(a, slice, column):	# Creates an array of all values for a given slide and a given column. 0 as a slide will return all values for a given column.
 	thevalues = []
 
 	for a in a:
@@ -83,7 +83,7 @@ def getValues(a, slice, column):	# gets the values for a given slice and row
 
 	return thevalues
 
-def getMetadata(a):
+def getMetadata(a):	# retrieves some metadata from a
 	thetime = time.asctime( time.localtime(time.time()) )	# local time
 	thefolder = a[1][col['PathName_DAPI']]	# folder of images
 	n = len(a) - 1	# -1 to account for column name
@@ -105,7 +105,7 @@ def getMetadata(a):
 	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors)]
 	return x
 
-def printResults(o, slicelist):
+def printResults(o, slicelist):		# Retrieves all the data and performs mathematical operations on it. CHANGE HERE FOR PERSONALIZED OUTPUT
 	print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 
 	for slicelist in slicelist:
