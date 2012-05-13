@@ -1,5 +1,6 @@
 #! /usr/bin/python
 # CellProfiler analysis script by Till Dettmering, prinzipiell@gmail.com
+# Please notify me if and how you use it.
 
 import csv
 import sys
@@ -38,18 +39,18 @@ def createcolumnlist(a): # Creates dictionary with column names and respective c
 		j += 1
 	return l
 
-def listSlices(a, column): # Creates list with all slides used in the experiment. Used later for whole-slide-operations. Assumes the file name to start with the slide name, followed by an underline: <slidename>_something.tif
-	slice = 'FileName'	# need to skip first row
-	slicelist = []
+def listslides(a, column): # Creates list with all slides used in the experiment. Used later for whole-slide-operations. Assumes the file name to start with the slide name, followed by an underline: <slidename>_something.tif
+	slide = 'FileName'	# need to skip first row
+	slidelist = []
 	
 	for a in a:
-		slice1 = a[column].split('_')[0]
-		if slice != slice1:
-			slice = slice1
-			slicelist.append(slice1)
-	return slicelist
+		slide1 = a[column].split('_')[0]
+		if slide != slide1:
+			slide = slide1
+			slidelist.append(slide1)
+	return slidelist
 
-def filterValues(a):	# If you specify a file with a list of images behind the CSV file, CellCruncher will analyse these images separately. 
+def filterValues(a):	# If you specify a file with a list of images as a second command line argument, CellCruncher will analyze these images separately. 
 	filterlist = readcsv(sys.argv[2]) 
 
 	filtered = []
@@ -68,17 +69,17 @@ def filterValues(a):	# If you specify a file with a list of images behind the CS
 	output = [filtered, rest]
 	return output
 
-def getValues(a, slice, column):	# Creates an array of all values for a given slide and a given column. 0 as a slide will return all values for a given column.
+def getValues(a, slide, column):	# Creates an array of all values for a given slide and a given column. 0 as a slide will return all values for a given column.
 	thevalues = []
 
 	for a in a:
-		if slice != 0:	# if slice = 0 then all values will be returned, irrespective of slice no
-			if a[sliceinfo].split('_')[0] == slice:
+		if slide != 0:	# if slide = 0 then all values will be returned, irrespective of slide no
+			if a[slideinfo].split('_')[0] == slide:
 				thevalues.append(a[column])
 		else:
 			thevalues.append(a[column])
 
-	if slice == 0:	# removes column designation in case all values of a column are returned
+	if slide == 0:	# removes column designation in case all values of a column are returned
 		thevalues.pop(0)
 
 	return thevalues
@@ -86,7 +87,7 @@ def getValues(a, slice, column):	# Creates an array of all values for a given sl
 def getMetadata(a):	# retrieves some metadata from a
 	thetime = time.asctime( time.localtime(time.time()) )	# local time
 	thefolder = a[1][col['PathName_DAPI']]	# folder of images
-	n = len(a) - 1	# -1 to account for column name
+	n = len(a) - 1	# Number of images; -1 to account for column name
 	
 	nuclei = int(sum(getValues(a, 0, col['Count_Nuclei'])))
 	timemanual = nuclei / 3	# estimation of counting time in seconds at a rate of 3 nuclei per s
@@ -105,20 +106,20 @@ def getMetadata(a):	# retrieves some metadata from a
 	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors)]
 	return x
 
-def printResults(o, slicelist):		# Retrieves all the data and performs mathematical operations on it. CHANGE HERE FOR PERSONALIZED OUTPUT
-	print 'Slice\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
+def printResults(o, slidelist):		# Retrieves all the data and performs mathematical operations on it. CHANGE HERE FOR PERSONALIZED OUTPUT
+	print 'Slide\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 
-	for slicelist in slicelist:
-		if len(getValues(o, slicelist, col['Count_Nuclei'])) > 0:	#only lists slice when nuclei > 0, for filtering!
-			nuclei = getValues(o, slicelist, col['Count_Nuclei'])
-			no = len(getValues(o, slicelist, col['Count_Nuclei']))
-			green = getValues(o, slicelist, col['Count_FilteredGreen'])
-			greenred = getValues(o, slicelist, col['Count_FilteredGreenRedDouble'])
-			red = getValues(o, slicelist, col['Count_FilteredRed'])
-			thresh_green = getValues(o, slicelist, col['Threshold_FinalThreshold_ThreshGreen'])	#getValues(a, slicelist, col['Math_Math_Green'])
-			thresh_red =  getValues(o, slicelist, col['Threshold_FinalThreshold_ThreshRed']) #getValues(a, slicelist, col['Math_Math_Red'])
+	for slidelist in slidelist:
+		if len(getValues(o, slidelist, col['Count_Nuclei'])) > 0:	#only lists slide when nuclei > 0, for filtering!
+			nuclei = getValues(o, slidelist, col['Count_Nuclei'])	# USAGE: your_result = getValues(o, slidelist, col['<desired_Column>']
+			no = len(getValues(o, slidelist, col['Count_Nuclei']))
+			green = getValues(o, slidelist, col['Count_FilteredGreen'])
+			greenred = getValues(o, slidelist, col['Count_FilteredGreenRedDouble'])
+			red = getValues(o, slidelist, col['Count_FilteredRed'])
+			thresh_green = getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshGreen'])
+			thresh_red =  getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshRed'])
 
-			print slicelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1)
+			print slidelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
 
 # MATH FUNCTIONS
 
@@ -168,9 +169,9 @@ def sem(array):
 a = readcsv(filename)	# read file into array
 col = createcolumnlist(a)	# creates dictionary with column positions
 
-sliceinfo = col['FileName_DAPI']	# which column should be taken to parse the slice name?
+slideinfo = col['FileName_DAPI']	# which column should be taken to parse the slide name?
 
-slicelist = listSlices(a, sliceinfo)	# generate list of slices in file
+slidelist = listslides(a, slideinfo)	# generate list of slides in file
 
 meta = getMetadata(a)
 print meta[0]
@@ -184,9 +185,9 @@ print ''
 
 if len(sys.argv) == 3:	# if filtered list is given in command line...
 	print 'FILTERED'
-	printResults(filterValues(a)[0],slicelist)
+	printResults(filterValues(a)[0],slidelist)
 	print ''
 	print 'REST'
-	printResults(filterValues(a)[1],slicelist)
+	printResults(filterValues(a)[1],slidelist)
 else:
-	printResults(a,slicelist)
+	printResults(a,slidelist)
