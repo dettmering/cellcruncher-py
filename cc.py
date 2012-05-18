@@ -7,8 +7,6 @@ import sys
 import math
 import time
 
-filename = sys.argv[1]
-
 def readcsv(filename):	# Reads csv file into an array which will then be used for all searches and calculations. Might be a problem with very large DefaultOut_Image.csv files, tested it with 100 MB
 	ifile  = open(filename, "rb")
 	reader = csv.reader(ifile)
@@ -90,6 +88,8 @@ def getMetadata(a):	# retrieves some metadata from a
 	n = len(a) - 1	# Number of images; -1 to account for column name
 	
 	nuclei = int(sum(getValues(a, 0, col['Count_Nuclei'])))
+	sumarea = n * area
+	
 	timemanual = nuclei / 3	# estimation of counting time in seconds at a rate of 3 nuclei per s
 	
 	exectime = 0
@@ -103,11 +103,11 @@ def getMetadata(a):	# retrieves some metadata from a
 		if j.find('ModuleError') == 0:
 			errors += sum(getValues(a, 0, col[j]))
 	
-	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors)]
+	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors), sumarea]
 	return x
 
 def printResults(o, slidelist):		# Retrieves all the data and performs mathematical operations on it. CHANGE HERE FOR PERSONALIZED OUTPUT
-	print 'Slide\t','No Images\t','Nuclei\t', 'Green\t', 'Double\t', 'Red\t','PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
+	print 'Slide\t', 'No Images\t', 'Area (mm^2)\t', 'Nuclei\t', 'Green\t', 'Red\t', 'Double\t', 'PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 
 	for slidelist in slidelist:
 		if len(getValues(o, slidelist, col['Count_Nuclei'])) > 0:	#only lists slide when nuclei > 0, for filtering!
@@ -119,7 +119,7 @@ def printResults(o, slidelist):		# Retrieves all the data and performs mathemati
 			thresh_green = getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshGreen'])
 			thresh_red =  getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshRed'])
 
-			print slidelist,'\t',no,'\t',sum(nuclei),'\t',sum(green),'\t',sum(greenred),'\t',sum(red),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei)),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
+			print slidelist,'\t',no,'\t',round((no * area),1),'\t',sum(nuclei),'\t',sum(green),'\t',sum(red),'\t',sum(greenred),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei),2),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
 
 # MATH FUNCTIONS
 
@@ -164,23 +164,29 @@ def sem(array):
 	
 	return sterr
 
-# --------------------------------------------------------- .split('_')[0]
+def stdevnorm(x, y, dy, z, dz):	# normalization of stdev, when x = y/z
+	wurzel = ((dy / y) * (dy / y)) + ((dz / z) * (dz / z))
+	dx = x * math.sqrt(wurzel)
+	
+	return dx
+	
+# ---------------------------------------------------------
+
+area = 635.34 * 474.57 / 1000000 # Area per image in mm^2 (Of course this is specific for the optical setup)
+filename = sys.argv[1]
 
 a = readcsv(filename)	# read file into array
 col = createcolumnlist(a)	# creates dictionary with column positions
-
 slideinfo = col['FileName_DAPI']	# which column should be taken to parse the slide name?
-
 slidelist = listslides(a, slideinfo)	# generate list of slides in file
 
 meta = getMetadata(a)
 print meta[0]
 print meta[1]
-print meta[2], 'Images'
-print meta[3], 'Nuclei'
+print meta[2], 'Images,',meta[6], 'Errors'
+print meta[3], 'Nuclei,', round(meta[7],2), 'mm2 scanned'
 print 'at least', int((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
 print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
-print meta[6], 'Errors'
 print ''
 
 if len(sys.argv) == 3:	# if filtered list is given in command line...
