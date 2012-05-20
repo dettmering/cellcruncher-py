@@ -28,6 +28,14 @@ def checkData(data, keywords):	# Searches string in Array by making one word out
 			return True
 	return False
 
+def addUp(needle, haystack):	# adds up all values from certain columns, e.g. all starting with ModuleError
+	result = 0
+	
+	for i in haystack:
+		if i.find(needle) == 0:
+			result += sum(getValues(a, 0, haystack[i]))
+	return result
+
 def createcolumnlist(a): # Creates dictionary with column names and respective column numbers. Facilitates using the script. col['<ColumnName'] returns number.
 	j = 0
 	l = {}
@@ -89,19 +97,9 @@ def getMetadata(a):	# retrieves some metadata from a
 	
 	nuclei = int(sum(getValues(a, 0, col['Count_Nuclei'])))
 	sumarea = n * area
-	
 	timemanual = nuclei / 3	# estimation of counting time in seconds at a rate of 3 nuclei per s
-	
-	exectime = 0
-	errors = 0
-	
-	for i in col:	# calculates execution time of whole run in seconds
-		if i.find('ExecutionTime') == 0:
-			exectime += sum(getValues(a, 0, col[i]))
-
-	for j in col:	# adds up errors
-		if j.find('ModuleError') == 0:
-			errors += sum(getValues(a, 0, col[j]))
+	exectime = addUp('ExecutionTime', col)
+	errors = addUp('ModuleError', col)
 	
 	x = [thetime, thefolder, n, nuclei, timemanual, exectime, int(errors), sumarea]
 	return x
