@@ -105,7 +105,7 @@ def getMetadata(a):	# retrieves some metadata from a
 	return x
 
 def printResults(o, slidelist):		# Retrieves all the data and performs mathematical operations on it. CHANGE HERE FOR PERSONALIZED OUTPUT
-	print 'Slide\t', 'No Images\t', 'Area (mm^2)\t', 'Nuclei\t', 'Green\t', 'Red\t', 'Double\t', 'PercentGreen\t', 'PercentRed\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
+	print 'Slide\t', 'No Images\t', 'Area (mm^2)\t', 'Nuclei\t', 'Green\t', 'Red\t', 'Double\t', 'PercentGreenInclRed\t', 'PercentGreenExclRed\t', 'PercentRedExclGreen\t', 'PercentDouble\t', 'Double/Green\t', 'Mean_NucleiPic\t', 'Stdev_NucleiPic\t', 'Mean_ThreshGreen\t', 'Mean_ThreshRed\t'
 
 	for slidelist in slidelist:
 		if len(getValues(o, slidelist, col['Count_Nuclei'])) > 0:	#only lists slide when nuclei > 0, for filtering!
@@ -117,7 +117,8 @@ def printResults(o, slidelist):		# Retrieves all the data and performs mathemati
 			thresh_green = getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshGreen'])
 			thresh_red =  getValues(o, slidelist, col['Threshold_FinalThreshold_ThreshRed'])
 
-			print slidelist,'\t',no,'\t',round((no * area),1),'\t',sum(nuclei),'\t',sum(green),'\t',sum(red),'\t',sum(greenred),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei),2),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
+			print slidelist,'\t',no,'\t',round((no * area),1),'\t',sum(nuclei),'\t',sum(green),'\t',sum(red),'\t',sum(greenred),'\t',round((sum(green)
+/sum(nuclei)*100),2),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei),2),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
 
 # MATH FUNCTIONS
 
