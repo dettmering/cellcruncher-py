@@ -116,6 +116,16 @@ def printResults(o, slidelist):		# Retrieves all the data and performs mathemati
 			red = getValues(o, n, col['Count_FilteredRed'])
 			thresh_green = getValues(o, n, col['Threshold_FinalThreshold_ThreshGreen'])
 			thresh_red =  getValues(o, n, col['Threshold_FinalThreshold_ThreshRed'])
+			perc_green = []
+			
+			for i in zip(nuclei, green):	# outputs percentage of green cells for each image separately (used to calc stdev)
+				try:
+					perc_green.append(float(i[1]) / float(i[0]) * 100)
+				except ZeroDivisionError:
+					perc_green.append(0)
+					
+#			print n, round((sum(green)/sum(nuclei)*100),2), mean(perc_green), stdev(perc_green), mean(perc_green) - (sum(green)/sum(nuclei)*100)
+					
 			print n,'\t',no,'\t',round((no * area),1),'\t',sum(nuclei),'\t',sum(green),'\t',sum(red),'\t',sum(greenred),'\t',round((sum(green)/sum(nuclei)*100),2),'\t',round(((sum(green)-sum(greenred))/sum(nuclei)*100),2),'\t',round(((sum(red)-sum(greenred))/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(nuclei)*100),2),'\t',round((sum(greenred)/sum(green)*100),2),'\t',round(mean(nuclei),2),'\t',round(stdev(nuclei),2),'\t',round((mean(thresh_green) * 65536),1),'\t',round((mean(thresh_red) * 65536),1) # output to be printed. All maths are performed in this line. * 65536 to scale relative values to 16 bit grey values.
 
 # MATH FUNCTIONS
