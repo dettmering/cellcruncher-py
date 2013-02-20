@@ -202,7 +202,7 @@ slidelist = listslides(a, slideinfo)	# generate list of slides in file
 ### Output file info and metadata
 
 meta = getMetadata(a)
-print meta[0]
+print 'This analysis sheet was generated on', meta[0]
 print 'TIFF image folder:', meta[1]
 print 'Input file:', filename
 print 'SHA1 hash of input file:', hashfile(filename)
