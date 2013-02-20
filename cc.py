@@ -4,6 +4,7 @@
 
 import csv
 import sys
+import hashlib
 import math
 import time
 
@@ -20,6 +21,15 @@ def readcsv(filename):	# Reads csv file into an array which will then be used fo
 	ifile.close()
 	
 	return a
+
+def hashfile(filename):
+        sha1 = hashlib.sha1()
+        f = open(filename, 'rb')
+        try:
+                sha1.update(f.read())
+        finally:
+                f.close()
+        return sha1.hexdigest()
 
 def checkData(data, keywords):	# Searches string in Array by making one word out of the whole array. Very fast. Returns True if string is found.
 	s = "\n".join(data)
@@ -187,14 +197,24 @@ col = createcolumnlist(a)	# creates dictionary with column positions
 slideinfo = col['FileName_DAPI']	# which column should be taken to parse the slide name?
 slidelist = listslides(a, slideinfo)	# generate list of slides in file
 
+
+
+### Output file info and metadata
+
 meta = getMetadata(a)
 print meta[0]
-print meta[1]
+print 'TIFF image folder:', meta[1]
+print 'Input file:', filename
+print 'SHA1 hash of input file:', hashfile(filename)
+
+print ''
 print meta[2], 'Images,',meta[6], 'Errors'
 print meta[3], 'Nuclei,', round(meta[7],2), 'mm2 scanned'
 print 'at least', int((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
 print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
 print ''
+
+### Output calculations
 
 if len(sys.argv) == 3:	# if filtered list is given in command line...
 	print 'FILTERED'
