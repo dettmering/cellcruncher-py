@@ -59,8 +59,8 @@ def listslides(a, column): # Creates list with all slides used in the experiment
 	slide = 'FileName'	# need to skip first row
 	slidelist = []
 	
-	for a in a:
-		slide1 = a[column].split('_')[0]
+	for x in a:
+		slide1 = x[column].split('_')[0]
 		if slide != slide1:
 			slide = slide1
 			slidelist.append(slide1)
@@ -88,12 +88,12 @@ def filterValues(a):	# If you specify a file with a list of images as a second c
 def getValues(a, slide, column):	# Creates an array of all values for a given slide and a given column. 0 as a slide will return all values for a given column.
 	thevalues = []
 
-	for a in a:
+	for x in a:
 		if slide != 0:	# if slide = 0 then all values will be returned, irrespective of slide no
-			if a[slideinfo].split('_')[0] == slide:
-				thevalues.append(a[column])
+			if x[slideinfo].split('_')[0] == slide:
+				thevalues.append(x[column])
 		else:
-			thevalues.append(a[column])
+			thevalues.append(x[column])
 
 	if slide == 0:	# removes column designation in case all values of a column are returned
 		thevalues.pop(0)
@@ -208,10 +208,10 @@ print 'Input file:', filename
 print 'SHA1 hash of input file:', hashfile(filename)
 
 print ''
-print meta[2], 'Images,',meta[6], 'Errors'
-print meta[3], 'Nuclei,', round(meta[7],2), 'mm2 scanned'
-print 'at least', int((meta[4] / 3600)), 'hours of work saved by using CellProfiler'
-print round((meta[5] / 3600),1), 'hours runtime of Pipeline'
+print '%i Images, %i Errors' % (meta[2], meta[6])
+print '%i Nuclei, %i mm2 scanned' % (meta[3], meta[7])
+print 'at least %i hours of work saved by using CellProfiler' % (meta[4] / 3600)
+print '%i hours runtime of Pipeline' % (meta[5] / 3600)
 print ''
 
 ### Output calculations
